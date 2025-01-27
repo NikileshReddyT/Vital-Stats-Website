@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /private/
+Disallow: /admin/
+Disallow: /docs/
+
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.vitalhealthsolutions.in/vssitemap.xml

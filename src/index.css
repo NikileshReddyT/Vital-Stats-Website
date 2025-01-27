@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .title {
+    @apply text-3xl md:text-4xl font-bold leading-snug;
+  }
+
+  .btn {
+    @apply border-2 border-blue-500 gap-3 hover:bg-blue-500 hover:border-blue-500 hover:text-white duration-150;
+  }
+}
+
+body {
+  background: #fff;
+  font-family: "Maven Pro";
+}
+
+/* NavBar */
+.navbar {
+  --webkit-backdrop-filter: blur(5px);
+}
+
+.navbarbutton:hover i.fa-arrow-right {
+  transform: translateY(-3px) rotate(-45deg);
+}
+
+.vert-move {
+  -webkit-animation: mover 1s infinite alternate;
+  animation: mover 1s infinite alternate;
+}
+
+@-webkit-keyframes mover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes mover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Features Page */
+/* Uncomment and customize this section if needed */
+/* 
+.features {
+  background: rgb(17,82,173);
+  background: radial-gradient(circle, rgba(17,82,173,0.852) 0%, rgba(0,212,255,1) 100%);
+}
+*/
+
+/* Loader */
+/* Add custom loader styles here if needed */
+
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
