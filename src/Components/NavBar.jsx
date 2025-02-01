@@ -1,260 +1,122 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import * as z from "zod";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Link, useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight, Menu } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Zod schema for form validation
-const schema = z.object({
-  name: z.string().min(5, { message: "Please enter your full name." }),
-  phoneNumber: z
-    .string()
-    .regex(/^\d{10}$/, { message: "Please enter a valid 10-digit phone number." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  message: z.string().min(20, { message: "Your message must be at least 20 characters long." }),
-});
+const links = [
+  { name: "Home", path: "/" },
+  { name: "How It Works", path: "/how-it-works" },
+  { name: "Features", path: "/features" },
+  { name: "Contact", path: "/contact" },
+  { name: "Join Team", path: "/join-team" }
+];
 
-function NavBar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const NavBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const [activeLink, setActiveLink] = useState(location.pathname);
-  const mobileMenuRef = useRef(null); // Ref for mobile menu
 
-  const links = [
-    { name: "Home", path: "/" },
-    { name: "How It Works", path: "/how-it-works" },
-    { name: "Features", path: "/features" },
-    { name: "Contact", path: "/contact" },
-    { name: "Join Team", path: "/join-team" },
-  ];
-
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
-  });
-
-  // Form submission
-  const onSubmit = async (data) => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const response = await axios.post("https://sheetdb.io/api/v1/qvfqwmj4aojv8", {
-        data: [
-          {
-            name: data.name,
-            email: data.email,
-            phoneNumber: data.phoneNumber,
-            message: data.message,
-          },
-        ],
-      });
-
-      if (response.status === 201 || response.status === 200) {
-        toast.success("Demo request submitted successfully!");
-        setIsModalOpen(false);
-        reset();
-      } else {
-        toast.error("Failed to submit the demo request. Please try again.", { closeOnClick: true });
-      }
-    } catch (error) {
-      toast.error(`Error: ${error.message}`, { closeOnClick: true });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Effect to update active link and handle mobile menu
+  // Close mobile menu on route change
   useEffect(() => {
-    setActiveLink(location.pathname);
-    setIsMenuOpen(false); // Close menu on route change
+    setIsOpen(false);
   }, [location.pathname]);
 
-  // Effect to handle body scroll lock and click outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setScrolled(offset > 50);
     };
 
-    if (isMenuOpen || isModalOpen) {
-      document.body.style.overflow = 'hidden';
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen, isModalOpen]);
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-    setIsMenuOpen(false);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
+  const handleLinkClick = () => {
+    setIsOpen(false);
   };
 
   return (
-    <div>
-      {/* Navbar */}
-      <nav className="flex justify-between items-center px-4 py-3 md:px-6 md:py-4 fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-        <Helmet>
-          <title>Vital Health Solutions</title>
-          <meta
-            name="description"
-            content="Vital Health Solutions is a leading healthcare solutions company specializing in personalized healthcare services."
-          />
-        </Helmet>
-
-        <div>
-          <Link to="/" onClick={closeMenu}>
-            <img src="/navbar.png" className="w-32 md:w-40" alt="Logo" />
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-6 text-sm">
-          {links.map((link) => (
-            <Link
-              to={link.path}
-              key={link.name}
-              onClick={closeMenu}
-              className={`relative cursor-pointer hover:text-blue-600 transition-colors duration-300 ${
-                activeLink === link.path ? "text-blue-600 font-bold" : "text-gray-700"
-              }`}
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? 'bg-white/10 backdrop-blur-md shadow-lg' : 'bg-transparent'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <img src={"/navbar.png"} alt="NutriTech Logo" className="h-10" />
+          <Link to="/" className="flex-shrink-0" onClick={handleLinkClick}>
+            <motion.span 
+              className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {link.name}
-              {activeLink === link.path && (
-                <motion.div
-                  layoutId="underline"
-                  className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"
-                  transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
-                />
-              )}
+              
+            </motion.span>
             </Link>
-          ))}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            {links.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className="relative group"
+                  onClick={handleLinkClick}
+                >
+                  <span className={`text-sm font-medium transition-colors duration-300 ${
+                    isActive ? 'text-red-600' : 'text-gray-600 hover:text-red-600'
+                  }`}>
+                    {link.name}
+                  </span>
+                  {/* Animated underline */}
+                  <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 to-red-400 transform origin-left transition-transform duration-300 ${
+                    isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`} />
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-red-600 
+                hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500 transition-colors"
+            >
+              <span className="sr-only">Open main menu</span>
+              {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
+            </motion.button>
+          </div>
         </div>
+      </div>
 
-        {/* Request Demo button and Menu for Mobile */}
-        <div className="flex items-center space-x-4">
-          <button
-            className="hidden md:flex items-center text-sm justify-center py-1.5 px-4 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300"
-            onClick={toggleModal}
-          >
-            Request Demo
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-
-          {/* Mobile Menu Icon */}
-          <button
-            id="menu-button"
-            className="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isOpen && (
           <motion.div
-            id="mobile-menu"
-            ref={mobileMenuRef}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden fixed top-0 left-0 w-full bg-white/95 backdrop-blur-lg rounded-b-3xl z-40 flex flex-col justify-between p-6 shadow-lg"
+            className="md:hidden bg-white/90 backdrop-blur-lg shadow-lg"
           >
-            <div className="flex justify-between items-center mb-6">
-              <Link to="/" onClick={closeMenu}>
-                <img src="/navbar.png" className="w-32" alt="Logo" />
-              </Link>
-              <button
-                className="text-gray-700 hover:text-blue-600 transition-colors"
-                onClick={closeMenu}
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="flex flex-col space-y-6">
+            <div className="px-2 pt-2 pb-3 space-y-1">
               {links.map((link) => (
                 <Link
-                  to={link.path}
                   key={link.name}
-                  onClick={closeMenu}
-                  className={`text-sm ${
-                    activeLink === link.path
-                      ? "text-blue-600 font-bold"
-                      : "text-gray-700"
-                  } hover:text-blue-600 transition-colors duration-300`}
+                  to={link.path}
+                  onClick={handleLinkClick}
+                  className="block w-full px-3 py-2 text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-all duration-300"
                 >
                   {link.name}
                 </Link>
               ))}
-              <button
-                className="flex items-center justify-center py-1.5 px-4 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300"
-                onClick={toggleModal}
-              >
-                Request Demo
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Modal for Request Demo */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center px-5 bg-gray-800/50 backdrop-blur-lg z-50"
-            onClick={toggleModal}
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white rounded-lg shadow-lg p-8 w-full max-w-xl relative border border-gray-200"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                className="absolute top-4 right-4 text-gray-700 hover:text-blue-600 transition-colors"
-                onClick={toggleModal}
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              <h2 className="text-center text-2xl font-bold text-blue-600 mb-4">
-                Schedule a Demo
-              </h2>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {/* Form fields remain the same */}
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </nav>
   );
-}
+};
 
 export default NavBar;

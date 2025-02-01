@@ -1,75 +1,107 @@
-import { motion } from 'framer-motion';
-import { Scale, Activity, Leaf, BrainCircuit } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Scale, Brain, Activity, X } from 'lucide-react';
+
+const steps = [
+  {
+    icon: <Scale className="w-8 h-8" />,
+    title: "Smart Scale Integration",
+    description: "Our IoT-enabled smart scale provides precise measurements and real-time data synchronization.",
+    details: "Experience the future of nutrition tracking with our advanced smart scale technology. Get instant, accurate measurements of your portions and nutritional content.",
+    gradient: "bg-gradient-to-r from-red-600 to-red-400",
+    iconBg: "bg-gradient-to-r from-red-600 to-red-400",
+    iconColor: "text-white"
+  },
+  {
+    icon: <Brain className="w-8 h-8" />,
+    title: "AI Analysis",
+    description: "Advanced AI algorithms analyze your data to provide personalized nutrition insights.",
+    details: "Our sophisticated AI system processes your nutritional data, preferences, and goals to deliver tailored recommendations for optimal health.",
+    gradient: "bg-gradient-to-r from-red-600 to-red-400",
+    iconBg: "bg-gradient-to-r from-red-600 to-red-400",
+    iconColor: "text-white"
+  },
+  {
+    icon: <Activity className="w-8 h-8" />,
+    title: "Health Optimization",
+    description: "Continuous monitoring and adaptation of your nutrition plan for optimal results.",
+    details: "Get real-time adjustments to your nutrition plan based on your progress, ensuring you stay on track to achieve your health goals.",
+    gradient: "bg-gradient-to-r from-red-600 to-red-400",
+    iconBg: "bg-gradient-to-r from-red-600 to-red-400",
+    iconColor: "text-white"
+  }
+];
+
+const IconWrapper = ({ children, gradient }) => (
+  <div className={`w-20 h-20 ${gradient} rounded-2xl p-5 flex items-center justify-center
+                   transform transition-all duration-300 group-hover:scale-110`}>
+    <div className="flex items-center justify-center">
+      {children}
+    </div>
+  </div>
+);
+
+const ModalIconWrapper = ({ children }) => (
+  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm p-3 flex items-center justify-center">
+    <div className="flex items-center justify-center">
+      {children}
+    </div>
+  </div>
+);
 
 const HowItWorks = () => {
-  const steps = [
-    {
-      icon: <Scale className="w-8 h-8 text-white" />,
-      title: "Smart Food Analysis",
-      description: "Our IoT-enabled scale measures 15+ nutritional parameters including calories, proteins, and micronutrients with 99% lab-grade accuracy"
-    },
-    {
-      icon: <Activity className="w-8 h-8 text-white" />,
-      title: "Health Integration",
-      description: "AI cross-references your medical history, blood reports, and fitness goals to create personalized diet plans"
-    },
-    {
-      icon: <Leaf className="w-8 h-8 text-white" />,
-      title: "Adaptive Nutrition",
-      description: "Machine learning adjusts recommendations based on daily progress and evolving health metrics"
-    }
-  ];
+  const [selectedStep, setSelectedStep] = useState(null);
 
   return (
-    <div className="relative py-24 bg-gradient-to-b from-white to-blue-50 overflow-hidden">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
-        >
-          <div className="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 mb-6">
-            <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-blue-600" />
-            <span className="text-sm font-medium text-blue-600">
-              KL University Innovation
-            </span>
-          </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            <span className="bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-              AI-Powered Nutrition Ecosystem
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Developed by B.Tech innovators to transform preventive healthcare through intelligent dietary management
-          </p>
-        </motion.div>
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl font-bold text-gray-900 mb-4"
+          >
+            How It Works
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-xl text-gray-600 max-w-2xl mx-auto"
+          >
+            Experience our seamless nutrition management process
+          </motion.p>
+        </div>
 
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          <div className="hidden md:block absolute top-1/4 left-0 right-0 h-1 bg-gray-200" />
-          
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
+              key={step.title}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "0px 0px -150px 0px" }}
-              transition={{ delay: index * 0.2 }}
-              className="relative z-10"
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              onClick={() => setSelectedStep(step)}
+              className="cursor-pointer group"
             >
-              <div className="absolute top-0 left-0 -translate-y-12 w-full flex justify-center md:hidden">
-                <BrainCircuit className="w-8 h-8 text-gray-400 rotate-90" />
-              </div>
-
-              <div className="flex flex-col items-center text-center bg-white rounded-2xl p-8 border border-gray-200 hover:border-blue-200 hover:shadow-lg transition-all h-full">
-                <div className="mb-6 bg-gradient-to-br from-blue-600 to-teal-600 p-4 rounded-2xl shadow-sm">
-                  {step.icon}
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+                {/* Icon */}
+                <div className="mb-6 flex justify-center">
+                  <IconWrapper gradient={step.gradient}>
+                    <div className={step.iconColor}>
+                      {step.icon}
+                    </div>
+                  </IconWrapper>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full mr-2">{index+1}</span>
+
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 text-center">
                   {step.description}
                 </p>
               </div>
@@ -77,48 +109,64 @@ const HowItWorks = () => {
           ))}
         </div>
 
-        {/* Value Proposition Section */}
-        <div className="mt-20 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="p-6 bg-white rounded-xl border border-blue-100"
-          >
-            <h3 className="text-lg font-semibold mb-2">🚀 For Individuals</h3>
-            <p className="text-gray-600 text-sm">
-              Manage diabetes, hypertension, or post-illness recovery through AI-curated meal plans
-            </p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="p-6 bg-white rounded-xl border border-teal-100"
-          >
-            <h3 className="text-lg font-semibold mb-2">🏆 For Healthcare</h3>
-            <p className="text-gray-600 text-sm">
-              Integrated provider portal for continuous patient monitoring and dietary intervention
-            </p>
-          </motion.div>
-        </div>
+        {/* Modal */}
+        <AnimatePresence>
+          {selectedStep && (
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setSelectedStep(null)}
+              />
 
-        {/* Innovation Badges */}
-        <div className="mt-12 flex flex-wrap justify-center gap-4">
-          {['Preventive Healthcare Focus', 'Medical-Grade Accuracy', 'University-Backed Technology'].map((badge, index) => (
-            <motion.div
-              key={badge}
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm font-medium"
-            >
-              {badge}
-            </motion.div>
-          ))}
-        </div>
+              {/* Modal Content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="relative w-[90%] max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden z-50"
+              >
+                {/* Header */}
+                <div className="bg-gradient-to-r from-red-600 to-red-400 p-6 text-white">
+                  <button
+                    onClick={() => setSelectedStep(null)}
+                    className="absolute right-4 top-4 text-white/80 hover:text-white transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+
+                  <div className="flex items-center space-x-4">
+                    <ModalIconWrapper>
+                      <div className={selectedStep.iconColor}>
+                        {selectedStep.icon}
+                      </div>
+                    </ModalIconWrapper>
+                    <div>
+                      <h3 className="text-2xl font-bold">
+                        {selectedStep.title}
+                      </h3>
+                      <p className="text-white/80 mt-1">
+                        {selectedStep.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <p className="text-gray-600">
+                    {selectedStep.details}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </section>
   );
 };
 

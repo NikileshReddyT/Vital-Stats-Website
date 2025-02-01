@@ -1,324 +1,493 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { UploadCloud, X, Loader2, CheckCircle, Code, Paintbrush, Video, Server, ArrowRight, Sparkles } from "lucide-react";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Users, 
+  Rocket, 
+  Heart,
+  Code,
+  Lightbulb,
+  Target,
+  X,
+  ChevronRight,
+  Upload,
+  Send,
+  Check
+} from 'lucide-react';
 
-// Zod schema for form validation
-const formSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  resume: z.instanceof(File, { message: "Resume is required" })
-    .refine(file => file.size <= 5 * 1024 * 1024, "File size must be less than 5MB")
-    .refine(file => file.type === "application/pdf", "Only PDF files are allowed"),
-  role: z.string().min(1, "Please select a role"),
-});
-
-const rolesData = [
+const benefits = [
   {
-    id: "mobile-app-dev",
+    icon: <Users className="w-8 h-8" />,
+    title: "Collaborative Environment",
+    description: "Work with a passionate team dedicated to transforming healthcare through technology."
+  },
+  {
+    icon: <Rocket className="w-8 h-8" />,
+    title: "Innovation First",
+    description: "Be at the forefront of healthcare technology, working with cutting-edge AI and IoT solutions."
+  },
+  {
+    icon: <Heart className="w-8 h-8" />,
+    title: "Impact Lives",
+    description: "Make a real difference in people's lives by improving their health outcomes."
+  },
+  {
+    icon: <Code className="w-8 h-8" />,
+    title: "Technical Growth",
+    description: "Develop your skills working with modern technologies and best practices."
+  },
+  {
+    icon: <Lightbulb className="w-8 h-8" />,
+    title: "Creative Freedom",
+    description: "Bring your ideas to life in an environment that encourages innovation and creativity."
+  },
+  {
+    icon: <Target className="w-8 h-8" />,
+    title: "Clear Growth Path",
+    description: "Well-defined career progression with opportunities for advancement and skill development."
+  }
+];
+
+const jobListings = [
+  {
+    icon: <Code className="w-8 h-8" />,
     title: "Mobile App Developer",
-    icon: <Code className="w-8 h-8 text-white" />,
-    description: "Craft revolutionary healthcare mobile experiences",
+    shortDescription: "Craft revolutionary healthcare mobile experiences",
     requirements: [
       "Expertise in React Native/Flutter",
       "Experience with FHIR/HL7 integrations",
       "Strong TypeScript knowledge",
+      "3+ years of mobile development experience",
+      "Understanding of healthcare data standards",
+      "Experience with state management (Redux/MobX)",
+      "Knowledge of mobile security best practices"
     ],
-    gradient: "from-blue-500 to-blue-400",
-    accent: "bg-blue-500",
+    responsibilities: [
+      "Develop and maintain mobile applications",
+      "Implement secure data handling",
+      "Optimize app performance",
+      "Collaborate with UI/UX team",
+      "Write clean, maintainable code",
+      "Participate in code reviews"
+    ]
   },
   {
-    id: "backend-dev",
+    icon: <Users className="w-8 h-8" />,
     title: "Backend Engineer",
-    icon: <Server className="w-8 h-8 text-white" />,
-    description: "Build secure healthcare infrastructure",
+    shortDescription: "Build secure healthcare infrastructure",
     requirements: [
       "Spring Boot expertise",
       "Microservices architecture",
       "PostgreSQL/Redis experience",
+      "3+ years of backend development",
+      "Experience with cloud platforms",
+      "Knowledge of security protocols",
+      "Understanding of HIPAA compliance"
     ],
-    gradient: "from-teal-500 to-teal-400",
-    accent: "bg-teal-500",
+    responsibilities: [
+      "Design and implement APIs",
+      "Manage database architecture",
+      "Ensure system scalability",
+      "Implement security measures",
+      "Monitor system performance",
+      "Write technical documentation"
+    ]
   },
   {
-    id: "ui-ux-designer",
+    icon: <Lightbulb className="w-8 h-8" />,
     title: "UI/UX Designer",
-    icon: <Paintbrush className="w-8 h-8 text-white" />,
-    description: "Shape patient-centric digital experiences",
+    shortDescription: "Shape patient-centric digital experiences",
     requirements: [
       "Figma/Adobe XD mastery",
       "Healthcare UX patterns",
       "Design system experience",
+      "3+ years of UI/UX design",
+      "Strong portfolio",
+      "User research experience",
+      "Accessibility knowledge"
     ],
-    gradient: "from-purple-500 to-purple-400",
-    accent: "bg-purple-500",
+    responsibilities: [
+      "Create user-centered designs",
+      "Develop design systems",
+      "Conduct user research",
+      "Create wireframes and prototypes",
+      "Collaborate with developers",
+      "Ensure design consistency"
+    ]
   },
   {
-    id: "video-producer",
+    icon: <Rocket className="w-8 h-8" />,
     title: "Medical Video Producer",
-    icon: <Video className="w-8 h-8 text-white" />,
-    description: "Create engaging medical education content",
+    shortDescription: "Create engaging medical education content",
     requirements: [
       "Premiere Pro expertise",
       "Medical animation skills",
       "Script writing",
+      "3+ years of video production",
+      "Healthcare content experience",
+      "Strong storytelling ability",
+      "Knowledge of medical terminology"
     ],
-    gradient: "from-rose-500 to-rose-400",
-    accent: "bg-rose-500",
-  },
+    responsibilities: [
+      "Produce educational videos",
+      "Create medical animations",
+      "Write compelling scripts",
+      "Edit and post-produce content",
+      "Collaborate with medical experts",
+      "Ensure content accuracy"
+    ]
+  }
 ];
 
-const JoinTeam = () => {
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const JobListingModal = ({ isOpen, onClose }) => {
+  const [selectedJob, setSelectedJob] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm({
-    resolver: zodResolver(formSchema),
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [applicationData, setApplicationData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    resume: null,
+    coverLetter: ''
   });
 
-  const onSubmit = async (data) => {
+  const handleJobClick = (job) => {
+    setSelectedJob(job);
+    setShowApplicationForm(false);
+  };
+
+  const handleApply = () => {
+    setShowApplicationForm(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success("Application submitted successfully!");
-      reset();
-      setIsModalOpen(false);
-    } catch (error) {
-      toast.error("Submission failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRoleSelect = (role) => {
-    setSelectedRole(role);
-    setValue("role", role.title);
-    setIsModalOpen(true);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) setValue("resume", file);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(false);
+    setShowApplicationForm(false);
+    setSelectedJob(null);
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        {/* Header Section */}
+    <AnimatePresence>
+      {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6"
         >
-          <div className="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-400 text-white px-6 py-2 rounded-full mb-8 space-x-2">
-            <Sparkles className="w-5 h-5" />
-            <span className="text-sm font-medium">Now Hiring Innovators</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Shape the Future of
-            <span className="bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent">
-              {" "}Healthcare Tech
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join our mission-driven team creating transformative digital health solutions
-          </p>
-        </motion.div>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            onClick={() => {
+              if (!showApplicationForm) {
+                setSelectedJob(null);
+                onClose();
+              }
+            }}
+          />
 
-        {/* Roles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
-          {rolesData.map((role) => (
-            <motion.div
-              key={role.id}
-              whileHover={{ y: -5 }}
-              className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer h-full flex flex-col border border-gray-100"
-              onClick={() => handleRoleSelect(role)}
+          {/* Modal Content */}
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="relative w-full max-w-6xl max-h-[90vh] overflow-auto rounded-2xl bg-white/90 backdrop-blur-xl shadow-2xl"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                if (showApplicationForm) {
+                  setShowApplicationForm(false);
+                } else if (selectedJob) {
+                  setSelectedJob(null);
+                } else {
+                  onClose();
+                }
+              }}
+              className="absolute top-4 right-4 p-2 rounded-full bg-gray-100/50 hover:bg-gray-100 transition-colors duration-200"
             >
-              <div className="p-8 flex flex-col h-full">
-                <div className={`${role.accent} w-max p-4 rounded-xl mb-6 shadow-sm`}>
-                  {role.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {role.title}
-                </h3>
-                <p className="text-gray-600 mb-6">{role.description}</p>
-                <div className="space-y-2 mb-6 flex-grow">
-                  {role.requirements.map((req, i) => (
-                    <div key={i} className="flex items-start text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-1 flex-shrink-0" />
-                      <span className="text-sm">{req}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-auto">
-                  <button className={`w-full ${role.accent} text-white font-medium px-4 py-3 rounded-lg flex items-center justify-center group-hover:opacity-90 transition-all`}>
-                    <span>Apply Now</span>
-                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
 
-        {/* Application Modal */}
-        <AnimatePresence>
-          {isModalOpen && selectedRole && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-2xl shadow-lg w-full max-w-2xl relative overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className={`${selectedRole.accent} p-3 rounded-lg shadow-sm`}>
-                        {selectedRole.icon}
-                      </div>
-                      <h2 className="text-3xl font-bold text-gray-900">
-                        {selectedRole.title}
-                      </h2>
-                    </div>
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Full Name
-                          </label>
-                          <input
-                            {...register("fullName")}
-                            type="text"
-                            className={`w-full px-4 py-3 rounded-lg border ${
-                              errors.fullName ? "border-red-500" : "border-gray-200"
-                            } focus:ring-2 focus:ring-blue-500`}
-                            placeholder="John Doe"
-                          />
-                          {errors.fullName && (
-                            <p className="text-red-500 text-sm mt-2">
-                              {errors.fullName.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Email Address
-                          </label>
-                          <input
-                            {...register("email")}
-                            type="email"
-                            className={`w-full px-4 py-3 rounded-lg border ${
-                              errors.email ? "border-red-500" : "border-gray-200"
-                            } focus:ring-2 focus:ring-blue-500`}
-                            placeholder="john@example.com"
-                          />
-                          {errors.email && (
-                            <p className="text-red-500 text-sm mt-2">
-                              {errors.email.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Phone Number
-                          </label>
-                          <input
-                            {...register("phone")}
-                            type="tel"
-                            className={`w-full px-4 py-3 rounded-lg border ${
-                              errors.phone ? "border-red-500" : "border-gray-200"
-                            } focus:ring-2 focus:ring-blue-500`}
-                            placeholder="+1 (555) 000-0000"
-                          />
-                          {errors.phone && (
-                            <p className="text-red-500 text-sm mt-2">
-                              {errors.phone.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Upload Resume (PDF only, max 5MB)
-                          </label>
-                          <div className="flex items-center justify-center w-full border-2 border-dashed border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-colors">
-                            <label className="cursor-pointer">
-                              <input
-                                type="file"
-                                {...register("resume")}
-                                onChange={handleFileChange}
-                                className="hidden"
-                                accept="application/pdf"
-                              />
-                              <div className="flex flex-col items-center gap-2">
-                                <UploadCloud className="w-8 h-8 text-gray-400" />
-                                <span className="text-gray-600 text-sm">
-                                  {watch("resume")?.name || "Drag & drop or click to upload"}
-                                </span>
+            <div className="p-8">
+              {!selectedJob ? (
+                <>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Open Positions</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {jobListings.map((job, index) => (
+                      <motion.div
+                        key={job.title}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        onClick={() => handleJobClick(job)}
+                        className="group cursor-pointer"
+                      >
+                        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+                          <div className="mb-6 flex justify-center">
+                            <div className="w-20 h-20 bg-gradient-to-r from-red-600 to-red-400 rounded-2xl p-5 flex items-center justify-center
+                                         transform transition-all duration-300 group-hover:scale-110">
+                              <div className="text-white">
+                                {job.icon}
                               </div>
-                            </label>
+                            </div>
                           </div>
-                          {errors.resume && (
-                            <p className="text-red-500 text-sm mt-2">
-                              {errors.resume.message}
-                            </p>
-                          )}
+                          <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                            {job.title}
+                          </h3>
+                          <p className="text-gray-600 text-center">
+                            {job.shortDescription}
+                          </p>
                         </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </>
+              ) : showApplicationForm ? (
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Apply for {selectedJob.title}</h3>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full px-4 py-2 rounded-lg bg-white/50 border border-gray-300"
+                        value={applicationData.name}
+                        onChange={(e) => setApplicationData({...applicationData, name: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full px-4 py-2 rounded-lg bg-white/50 border border-gray-300"
+                        value={applicationData.email}
+                        onChange={(e) => setApplicationData({...applicationData, email: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                      <input
+                        type="tel"
+                        required
+                        className="w-full px-4 py-2 rounded-lg bg-white/50 border border-gray-300"
+                        value={applicationData.phone}
+                        onChange={(e) => setApplicationData({...applicationData, phone: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Resume</label>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          required
+                          className="hidden"
+                          id="resume"
+                          onChange={(e) => setApplicationData({...applicationData, resume: e.target.files[0]})}
+                        />
+                        <label
+                          htmlFor="resume"
+                          className="flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 border-dashed border-gray-300
+                                   bg-white/50 cursor-pointer hover:border-red-500 transition-colors duration-300"
+                        >
+                          <Upload className="w-5 h-5 text-gray-400 mr-2" />
+                          <span className="text-gray-600">Upload Resume (PDF, DOC, DOCX)</span>
+                        </label>
                       </div>
                     </div>
-
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Cover Letter</label>
+                      <textarea
+                        required
+                        rows={4}
+                        className="w-full px-4 py-2 rounded-lg bg-white/50 border border-gray-300"
+                        value={applicationData.coverLetter}
+                        onChange={(e) => setApplicationData({...applicationData, coverLetter: e.target.value})}
+                      />
+                    </div>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`w-full ${selectedRole.accent} text-white font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2`}
+                      className="w-full inline-flex items-center justify-center px-6 py-3 rounded-lg
+                               bg-gradient-to-r from-red-600 to-red-400 text-white font-medium
+                               hover:from-red-700 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                               disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
                           Submitting...
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-5 h-5" />
+                          <Send className="w-5 h-5 mr-2" />
                           Submit Application
                         </>
                       )}
                     </button>
                   </form>
                 </div>
-              </motion.div>
+              ) : (
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center justify-center mb-8">
+                    <div className="w-20 h-20 bg-gradient-to-r from-red-600 to-red-400 rounded-2xl p-5 flex items-center justify-center">
+                      <div className="text-white">
+                        {selectedJob.icon}
+                      </div>
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4 text-center">{selectedJob.title}</h3>
+                  <p className="text-xl text-gray-600 mb-8 text-center">{selectedJob.shortDescription}</p>
+                  
+                  <div className="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h4 className="text-xl font-semibold text-gray-900 mb-4">Requirements</h4>
+                      <ul className="space-y-3">
+                        {selectedJob.requirements.map((req, index) => (
+                          <motion.li
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="flex items-start gap-3"
+                          >
+                            <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                            <span className="text-gray-600">{req}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-gray-900 mb-4">Responsibilities</h4>
+                      <ul className="space-y-3">
+                        {selectedJob.responsibilities.map((resp, index) => (
+                          <motion.li
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="flex items-start gap-3"
+                          >
+                            <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                            <span className="text-gray-600">{resp}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <button
+                      onClick={handleApply}
+                      className="inline-flex items-center justify-center px-8 py-4 rounded-xl
+                               bg-gradient-to-r from-red-600 to-red-400 text-white font-medium
+                               hover:from-red-700 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                               transition-all duration-300"
+                    >
+                      Apply Now
+                      <ChevronRight className="ml-2 w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const JoinTeam = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl font-bold text-gray-900 mb-4"
+          >
+            Join Our Team
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-xl text-gray-600 max-w-2xl mx-auto"
+          >
+            Be part of a team that's revolutionizing healthcare through technology
+          </motion.p>
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {benefits.map((benefit, index) => (
+            <motion.div
+              key={benefit.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="group"
+            >
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col items-center">
+                {/* Icon */}
+                <div className="mb-6">
+                  <div className="w-20 h-20 bg-red-600 rounded-2xl p-5 flex items-center justify-center
+                               transform transition-all duration-300 group-hover:scale-110">
+                    <div className="text-white">
+                      {benefit.icon}
+                    </div>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                  {benefit.title}
+                </h3>
+                <p className="text-gray-600 text-center">
+                  {benefit.description}
+                </p>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          ))}
+        </div>
+
+        {/* CTA Button */}
+        <div className="text-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300"
+          >
+            View Open Positions
+            <ChevronRight className="ml-2 w-5 h-5" />
+          </motion.button>
+        </div>
+
+        <JobListingModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
-    </div>
+    </section>
   );
 };
 

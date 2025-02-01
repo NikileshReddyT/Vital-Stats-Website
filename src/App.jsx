@@ -5,6 +5,8 @@ import 'aos/dist/aos.css';
 import Loader from './Components/Loader';
 import NavBar from './Components/NavBar';
 import NotFound from './Components/NotFound';
+import ScrollToTop from './Components/ScrollToTop';
+import Footer from './Components/Footer';
 
 // Lazy Loaded Components
 const HomePage = lazy(() => import('./Pages/HomePage'));
@@ -13,7 +15,6 @@ const FeaturesPage = lazy(() => import('./Pages/FeaturesPage'));
 const ContactPage = lazy(() => import('./Pages/ContactPage'));
 const JoinTeamPage = lazy(() => import('./Pages/JoinTeamPage'));
 const HowItWorksPage = lazy(() => import('./Pages/HowItWorksPage'));
-const Footer = lazy(() => import('./Components/Footer'));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +38,8 @@ function App() {
 
   return (
     <Router>
-      <div className='overflow-x-hidden bg-violet-900'>
+      <ScrollToTop />
+      <div className='overflow-x-hidden bg-[#fffdfd]'>
         <Suspense fallback={<Loader />}>
           <Routes>
             <Route path='/' element={<><NavBar /><HomePage /><Footer /></>} />

@@ -1,94 +1,80 @@
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { BeakerIcon, DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { BeakerIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 const HealthTechLanding = () => {
   const ref = useRef();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { scrollYProgress } = useScroll();
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
 
-  const featureVariants = {
+  const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#f8fcff]">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-24 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-white via-red-50 to-white">
+      <section className="relative pt-24 pb-32 overflow-hidden">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-block mb-8 rounded-full bg-blue-50 px-4 py-2 backdrop-blur-sm"
+              className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-red-600 rounded-full border border-red-100 bg-red-50/50 backdrop-blur-xl shadow-sm mb-6"
             >
-              <span className="text-sm font-medium text-blue-600">
-                🚀 Emerging from KL University Innovation Labs
-              </span>
+              <BeakerIcon className="w-4 h-4 mr-2 text-red-600 " />
+              <span>Pioneering Health Tech</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-5xl font-bold leading-tight text-gray-900 md:text-6xl"
+              className="text-4xl font-bold leading-tight text-gray-900 md:text-6xl lg:text-7xl"
             >
-              <span className="block text-transparent bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text">
-                Next-Gen Nutritional
+              <span className="block text-transparent bg-gradient-to-r from-red-600 to-red-400 bg-clip-text">
+                Smart Nutrition
               </span>
-              <motion.span 
-                className="block mt-4 text-gray-900"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                Intelligence Platform
-              </motion.span>
+              <span className="block mt-3 text-gray-900 text-3xl md:text-5xl lg:text-6xl">
+                Reimagined
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="mx-auto mt-8 max-w-2xl text-xl text-gray-600"
+              transition={{ delay: 0.4 }}
+              className="mx-auto mt-8 max-w-2xl text-lg text-gray-600"
             >
-              Synergizing IoT hardware with AI analytics to transform dietary management
-              through precision measurement and personalized insights
+              Revolutionizing dietary management through AI-powered analysis
+              and IoT precision measurement technology
             </motion.p>
 
             <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.8, type: "spring" }}
-              whileHover={{ scale: 1.05 }}
-              className="mt-12 inline-block"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-12 space-x-4"
             >
               <a
                 href="#demo"
-                className="flex items-center gap-3 px-8 py-4 text-lg font-semibold text-white transition-all rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center px-8 py-3 text-base font-medium text-white bg-gradient-to-r from-red-600 to-red-500 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
               >
-                <motion.svg 
-                  className="w-6 h-6"
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </motion.svg>
-                Explore Platform Demo
+                Get Started
+              </a>
+              <a
+                href="#learn-more"
+                className="inline-flex items-center px-8 py-3 text-base font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-all duration-300"
+              >
+                Learn More
               </a>
             </motion.div>
           </div>
 
-          {/* Feature Visualization */}
           <motion.div 
-            className="mt-24 grid gap-12 md:grid-cols-2"
+            className="mt-24 grid gap-8 md:grid-cols-2"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -96,61 +82,33 @@ const HealthTechLanding = () => {
               visible: { transition: { staggerChildren: 0.2 } }
             }}
           >
-            {/* Smart Measurement Card */}
             <motion.div 
-              variants={featureVariants}
-              className="p-8 space-y-8 bg-white rounded-2xl shadow-surface"
+              variants={fadeInUp}
+              className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-red-100"
             >
-              <div className="space-y-4 flex flex-col items-center justify-center">
-                <motion.div 
-                  className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 flex items-center justify-center"
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                >
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-red-600 to-red-400 flex items-center justify-center">
                   <BeakerIcon className="w-6 h-6 text-white" />
-                </motion.div>
-                <h3 className="text-2xl font-bold text-gray-900">Smart Measurement</h3>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Precision Analysis</h3>
                 <p className="text-gray-600">
-                  IoT-enabled precision analysis with lab-grade accuracy
+                  Advanced IoT sensors delivering laboratory-grade measurement accuracy
                 </p>
-              </div>
-              <div className="aspect-video bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl flex items-center justify-center">
-                {/* <motion.div 
-                  className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center"
-                  animate={{ y: [-5, 5, -5] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <span className="text-2xl">⚖️</span>
-                </motion.div> */}
               </div>
             </motion.div>
 
-            {/* AI Prescription Analyzer Card */}
             <motion.div 
-              variants={featureVariants}
-              className="p-8 space-y-8 bg-white rounded-2xl shadow-surface"
+              variants={fadeInUp}
+              className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-red-100"
             >
-              <div className="space-y-4 flex flex-col items-center justify-center ">
-                <motion.div 
-                  className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 flex items-center justify-center"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <DocumentMagnifyingGlassIcon className="w-6 h-6 text-white" />
-                </motion.div>
-                <h3 className="text-2xl font-bold text-gray-900">NutriScan AI</h3>
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-red-600 to-red-400 flex items-center justify-center">
+                  <ChartBarIcon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">AI-Powered Insights</h3>
                 <p className="text-gray-600">
-                  Prescription analysis and adaptive nutrition planning
+                  Smart nutrition recommendations backed by advanced machine learning
                 </p>
-              </div>
-              <div className="aspect-video bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl flex items-center justify-center">
-                {/* <motion.div 
-                  className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center"
-                  animate={{ rotate: [0, 180, 0] }}
-                  transition={{ duration: 6, repeat: Infinity }}
-                >
-                  <span className="text-2xl">🧠</span>
-                </motion.div> */}
               </div>
             </motion.div>
           </motion.div>
@@ -172,10 +130,10 @@ const HealthTechLanding = () => {
           >
             <motion.div 
               className="space-y-8"
-              variants={featureVariants}
+              variants={fadeInUp}
             >
               <h2 className="text-3xl font-bold text-gray-900">
-                <span className="text-transparent bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text">
+                <span className="text-transparent bg-gradient-to-r from-red-600 to-red-400 bg-clip-text">
                   Technology Ecosystem
                 </span>
               </h2>
@@ -208,10 +166,10 @@ const HealthTechLanding = () => {
 
             <motion.div 
               className="space-y-8"
-              variants={featureVariants}
+              variants={fadeInUp}
             >
               <motion.div 
-                className="overflow-hidden rounded-2xl aspect-[4/3] bg-gradient-to-r from-blue-50 to-teal-50"
+                className="overflow-hidden rounded-2xl aspect-[4/3] bg-gradient-to-r from-red-50 to-red-100"
                 style={{ scale }}
               />
               <div className="grid grid-cols-2 gap-8">
@@ -231,10 +189,10 @@ const HealthTechLanding = () => {
       </section>
 
       {/* Value Proposition */}
-      <section className="py-24 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-24 bg-gradient-to-b from-red-50 to-white">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           <motion.div 
-            className="p-12 text-center text-white bg-gray-900 rounded-2xl shadow-2xl"
+            className="p-12 text-center text-white bg-red-900 rounded-2xl shadow-2xl"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -242,7 +200,7 @@ const HealthTechLanding = () => {
             <h2 className="text-3xl font-bold">
               Transforming Nutritional Health
             </h2>
-            <p className="mt-4 text-blue-200">
+            <p className="mt-4 text-red-200">
               Bridging technology and wellness through innovative dietary management solutions
             </p>
             
@@ -277,7 +235,7 @@ const HealthTechLanding = () => {
           >
             <motion.div 
               className="space-y-8"
-              variants={featureVariants}
+              variants={fadeInUp}
             >
               <h3 className="text-2xl font-bold text-gray-900">
                 Clinical-Grade Architecture
@@ -295,7 +253,7 @@ const HealthTechLanding = () => {
                       className="flex items-center gap-4"
                       whileHover={{ x: 5 }}
                     >
-                      <div className="flex-shrink-0 w-3 h-3 bg-blue-600 rounded-full" />
+                      <div className="flex-shrink-0 w-3 h-3 bg-red-600 rounded-full" />
                       <span className="text-gray-900">{item}</span>
                     </motion.div>
                   ))}
@@ -305,7 +263,7 @@ const HealthTechLanding = () => {
 
             <motion.div 
               className="space-y-8"
-              variants={featureVariants}
+              variants={fadeInUp}
             >
               <h3 className="text-2xl font-bold text-gray-900">
                 Development Roadmap
@@ -325,7 +283,7 @@ const HealthTechLanding = () => {
                       whileInView={{ opacity: 1 }}
                       transition={{ delay: index * 0.2 }}
                     >
-                      <div className="flex-shrink-0 text-blue-600">0{index + 1}</div>
+                      <div className="flex-shrink-0 text-red-600">0{index + 1}</div>
                       <span className="text-gray-900">{item}</span>
                     </motion.div>
                   ))}
